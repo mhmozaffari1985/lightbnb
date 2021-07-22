@@ -1,14 +1,7 @@
-const { Pool } = require('pg');
+const db = require('./databaseInitiation');
 
-const pool = new Pool({
-  user: 'vagrant',
-  password: '123',
-  host: 'localhost',
-  database: 'lightbnb'
-});
-
-const properties = require('./json/properties.json');
-const users = require('./json/users.json');
+// const properties = require('./json/properties.json');
+// const users = require('./json/users.json');
 
 /// Users
 
@@ -32,7 +25,7 @@ const users = require('./json/users.json');
 // };
 
 const getUserWithEmail = function(email) {
-  return pool
+  return db
     .query(`SELECT * FROM users WHERE email = $1`, [email])
     .then((result) => {
       //console.log(result.rows);
@@ -58,7 +51,7 @@ exports.getUserWithEmail = getUserWithEmail;
 // };
 
 const getUserWithId = function(id) {
-  return pool
+  return db
     .query(`SELECT * FROM users WHERE id = $1`, [id])
     .then((result) => {
       //console.log(result.rows);
@@ -88,7 +81,7 @@ exports.getUserWithId = getUserWithId;
 // };
 
 const addUser = function(user) {
-  return pool
+  return db
     .query(`INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *;`, [user.name, user.email, user.password])
     .then((result) => {
       //console.log(result.rows);
@@ -109,7 +102,7 @@ exports.addUser = addUser;
  */
 const getAllReservations = function(guest_id, limit = 10) {
   //return getAllProperties(null, 2);
-  return pool
+  return db
     .query(`SELECT properties.*, reservations.*, avg(rating) as average_rating
     FROM reservations
     JOIN properties ON reservations.property_id = properties.id
@@ -214,7 +207,7 @@ const getAllProperties = function(options, limit = 10) {
   console.log(queryString, queryParams);
 
   // 6
-  return pool.query(queryString, queryParams).then((res) => res.rows);
+  return db.query(queryString, queryParams).then((res) => res.rows);
 };
 
 exports.getAllProperties = getAllProperties;
@@ -230,7 +223,7 @@ const addProperty = function(property) {
   // property.id = propertyId;
   // properties[propertyId] = property;
   // return Promise.resolve(property);
-  return pool
+  return db
     .query(`INSERT INTO properties (owner_id, title, description, thumbnail_photo_url, cover_photo_url, 
       cost_per_night, parking_spaces, number_of_bathrooms, number_of_bedrooms, country,
       street, city, province, post_code)
